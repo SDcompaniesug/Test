@@ -1,21 +1,21 @@
 {
-  "showUpdateDialog": false,
-  "forceUpdate": true,
-  "updateTitle": "New Update Available!",
-  "updateMessage": "Version 2.0 is now ready!\n\nWhat's New:\n✓ Enhanced security\n✓ Better performance\n✓ New features added\n✓ Bug fixes\n\nPlease update to continue using the app with the best experience.",
-  "updateButtonText": "Update Now",
-  "laterButtonText": "Later",
+  "showUpdateDialog": true,
+  "forceUpdate": false,
+  "updateTitle": "🔄 Real-Time Update Available!",
+  "updateMessage": "Version 3.0 is now live!\n\n✨ What's New:\n✓ Real-time configuration updates\n✓ Enhanced security protocols\n✓ Instant dialog refresh\n✓ Improved performance\n✓ Bug fixes and optimizations\n\nUpdate now for the best experience!",
+  "updateButtonText": "⚡ Update Instantly",
+  "laterButtonText": "⏰ Remind Later",
   "updateUrl": "https://github.com/SDcompaniesug/Test/releases/latest",
   
   "showWelcomeDialog": true,
-  "welcomeMessage": "✨ Welcome to Secure App!\n\nYour privacy and security is our top priority.\nEnjoy a seamless experience with us.",
-  "welcomeButtonText": "🚀 Get Started",
+  "welcomeMessage": "🎉 Welcome to Secure App!\n\nExperience real-time updates and instant configuration changes.\nYour security is our priority.",
+  "welcomeButtonText": "🚀 Let's Start",
   
   "loginEnabled": true,
-  "loginTitle": "Authentication",
-  "usernameHint": "📧 Enter your username",
-  "passwordHint": "🔒 Enter your password",
-  "loginButtonText": "✅ Login",
+  "loginTitle": "🔐 Secure Access",
+  "usernameHint": "👤 Enter username",
+  "passwordHint": "🔒 Enter password",
+  "loginButtonText": "✅ Authenticate",
   "cancelButtonText": "❌ Cancel",
   "validCredentials": {
     "username": "admin",
@@ -23,7 +23,15 @@
   },
   
   "adminWhatsApp": "+256708562567",
-  "appVersion": "2.0",
-  "minSupportedVersion": "1.5",
-  "supportEmail": "support@secureapp.com"
+  "appVersion": "3.0",
+  "minSupportedVersion": "2.0",
+  "supportEmail": "support@secureapp.com",
+  "autoUpdateInterval": 2000,
+  "lastUpdated": "2024-01-15T10:30:00Z",
+  "features": {
+    "realTimeUpdates": true,
+    "instantDialogRefresh": true,
+    "noRestartRequired": true,
+    "adminWhatsAppSupport": true
+  }
 }
