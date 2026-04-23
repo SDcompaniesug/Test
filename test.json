@@ -1,7 +1,7 @@
 {
   "showUpdateDialog": true,
   "forceUpdate": false,
-  "updateTitle": "🔄 Real-Time Update Available!",
+  "updateTitle": " Real-Time Update Available!",
   "updateMessage": "Version 3.0 is now live!\n\n✨ What's New:\n✓ Real-time configuration updates\n✓ Enhanced security protocols\n✓ Instant dialog refresh\n✓ Improved performance\n✓ Bug fixes and optimizations\n\nUpdate now for the best experience!",
   "updateButtonText": "⚡ Update Instantly",
   "laterButtonText": "⏰ Remind Later",
