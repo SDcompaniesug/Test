@@ -1,10 +1,10 @@
 {
   "showUpdateDialog": true,
-  "forceUpdate": false,
-  "updateTitle": "📱 New Update Available!",
+  "forceUpdate": true,
+  "updateTitle": "New Update Available!",
   "updateMessage": "Version 2.0 is now ready!\n\nWhat's New:\n✓ Enhanced security\n✓ Better performance\n✓ New features added\n✓ Bug fixes\n\nPlease update to continue using the app with the best experience.",
-  "updateButtonText": "🔄 Update Now",
-  "laterButtonText": "⏰ Later",
+  "updateButtonText": "Update Now",
+  "laterButtonText": "Later",
   "updateUrl": "https://github.com/SDcompaniesug/Test/releases/latest",
   
   "showWelcomeDialog": true,
