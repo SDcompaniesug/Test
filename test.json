@@ -1,10 +1,10 @@
 {
   "showUpdateDialog": true,
-  "forceUpdate": false,
+  "forceUpdate": true,
   "updateTitle": " Real-Time Update Available!",
   "updateMessage": "Version 3.0 is now live!\n\n✨ What's New:\n✓ Real-time configuration updates\n✓ Enhanced security protocols\n✓ Instant dialog refresh\n✓ Improved performance\n✓ Bug fixes and optimizations\n\nUpdate now for the best experience!",
-  "updateButtonText": "⚡ Update Instantly",
-  "laterButtonText": "⏰ Remind Later",
+  "updateButtonText": "Update",
+  "laterButtonText": "Later",
   "updateUrl": "https://github.com/SDcompaniesug/Test/releases/latest",
   
   "showWelcomeDialog": true,
@@ -12,10 +12,10 @@
   "welcomeButtonText": "🚀 Let's Start",
   
   "loginEnabled": true,
-  "loginTitle": "🔐 Secure Access",
+  "loginTitle": "Authentication",
   "usernameHint": "👤 Enter username",
   "passwordHint": "🔒 Enter password",
-  "loginButtonText": "✅ Authenticate",
+  "loginButtonText": "Login",
   "cancelButtonText": "❌ Cancel",
   "validCredentials": {
     "username": "admin",
