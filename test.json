@@ -16,7 +16,7 @@
   "usernameHint": "📧 Enter your username",
   "passwordHint": "🔒 Enter your password",
   "loginButtonText": "✅ Login",
-  "cancelButtonText": "❌ Cancel",
+  "cancelButtonText": "❌n Cancel",
   "validCredentials": {
     "username": "admin",
     "password": "1234"
