@@ -12,11 +12,11 @@
   "welcomeButtonText": "🚀 Get Started",
   
   "loginEnabled": true,
-  "loginTitle": "🔐 Secure Authentication",
+  "loginTitle": "Authentication",
   "usernameHint": "📧 Enter your username",
   "passwordHint": "🔒 Enter your password",
   "loginButtonText": "✅ Login",
-  "cancelButtonText": "❌n Cancel",
+  "cancelButtonText": "❌ Cancel",
   "validCredentials": {
     "username": "admin",
     "password": "1234"
