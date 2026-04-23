@@ -29,7 +29,7 @@
   "autoUpdateInterval": 2000,
   "lastUpdated": "2024-01-15T10:30:00Z",
   "features": {
-    "realTimeUpdates": true,
+    "realTimeUpdates": false,
     "instantDialogRefresh": true,
     "noRestartRequired": true,
     "adminWhatsAppSupport": true
