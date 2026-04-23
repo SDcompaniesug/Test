@@ -1,0 +1,15 @@
+{
+  "showWelcomeDialog": true,
+  "welcomeMessage": "Welcome to Our App!\nEnjoy your experience.",
+  "welcomeButtonText": "Get Started",
+  "loginEnabled": true,
+  "loginTitle": "Sign In",
+  "usernameHint": "Username",
+  "passwordHint": "Password",
+  "loginButtonText": "Login",
+  "cancelButtonText": "Cancel",
+  "validCredentials": {
+    "username": "admin",
+    "password": "1234"
+  }
+}
