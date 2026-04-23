@@ -1,15 +1,29 @@
 {
+  "showUpdateDialog": true,
+  "forceUpdate": false,
+  "updateTitle": "📱 New Update Available!",
+  "updateMessage": "Version 2.0 is now ready!\n\nWhat's New:\n✓ Enhanced security\n✓ Better performance\n✓ New features added\n✓ Bug fixes\n\nPlease update to continue using the app with the best experience.",
+  "updateButtonText": "🔄 Update Now",
+  "laterButtonText": "⏰ Later",
+  "updateUrl": "https://github.com/SDcompaniesug/Test/releases/latest",
+  
   "showWelcomeDialog": true,
-  "welcomeMessage": "Welcome to Our App!\nEnjoy your experience.",
-  "welcomeButtonText": "Get Started",
+  "welcomeMessage": "✨ Welcome to Secure App!\n\nYour privacy and security is our top priority.\nEnjoy a seamless experience with us.",
+  "welcomeButtonText": "🚀 Get Started",
+  
   "loginEnabled": true,
-  "loginTitle": "Sign In",
-  "usernameHint": "Username",
-  "passwordHint": "Password",
-  "loginButtonText": "Login",
-  "cancelButtonText": "Cancel",
+  "loginTitle": "🔐 Secure Authentication",
+  "usernameHint": "📧 Enter your username",
+  "passwordHint": "🔒 Enter your password",
+  "loginButtonText": "✅ Login",
+  "cancelButtonText": "❌ Cancel",
   "validCredentials": {
     "username": "admin",
     "password": "1234"
-  }
+  },
+  
+  "adminWhatsApp": "+256708562567",
+  "appVersion": "2.0",
+  "minSupportedVersion": "1.5",
+  "supportEmail": "support@secureapp.com"
 }
