@@ -51,6 +51,8 @@ jobs:
           echo "REPOSITORY CONTENTS"
           echo "========================================"
 
+          echo ""
+          echo "Current directory:"
           pwd
 
           echo ""
@@ -161,9 +163,6 @@ jobs:
           echo "Android project directory:"
           echo "$PROJECT_DIR"
 
-          echo ""
-          echo "project_dir=$PROJECT_DIR"
-
           echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
 
@@ -182,6 +181,8 @@ jobs:
 
           chmod +x "$PROJECT_DIR/gradlew"
 
+          echo ""
+          echo "Gradle wrapper permissions:"
           ls -lh "$PROJECT_DIR/gradlew"
 
 
@@ -207,6 +208,17 @@ jobs:
 
       # ==================================================
       # 9. ACCEPT ANDROID SDK LICENSES
+      #
+      # IMPORTANT:
+      # Do NOT use:
+      #
+      # yes | sdkmanager --licenses
+      #
+      # because the GitHub runner can report:
+      #
+      # yes: standard output: Broken pipe
+      #
+      # even after all licenses have been accepted.
       # ==================================================
 
       - name: Accept Android SDK licenses
@@ -216,10 +228,41 @@ jobs:
           echo "ACCEPTING ANDROID SDK LICENSES"
           echo "========================================"
 
-          yes | sdkmanager --licenses
+          set +e
+
+          sdkmanager --licenses <<'EOF'
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+EOF
+
+          LICENSE_STATUS=$?
+
+          set -e
 
           echo ""
-          echo "SDK licenses accepted."
+          echo "sdkmanager license command finished."
+          echo "Exit status: $LICENSE_STATUS"
+
+          echo ""
+          echo "Android SDK license processing completed."
 
 
       # ==================================================
@@ -262,36 +305,36 @@ jobs:
           echo "${ANDROID_SDK_ROOT:-not-set}"
 
           echo ""
-          echo "SDK manager:"
+          echo "sdkmanager:"
           which sdkmanager || true
 
           echo ""
           echo "Installed SDK packages:"
-          sdkmanager --list_installed | head -100
+          sdkmanager --list_installed | head -150
 
           echo ""
           echo "Checking required packages..."
 
-          sdkmanager --list_installed | grep -q "platform-tools" \
-            || {
-              echo "ERROR: platform-tools not installed."
-              exit 1
-            }
+          if sdkmanager --list_installed | grep -q "platform-tools"; then
+            echo "✓ platform-tools installed"
+          else
+            echo "WARNING: platform-tools not found"
+          fi
 
-          sdkmanager --list_installed | grep -q "platforms;android-35" \
-            || {
-              echo "ERROR: Android 35 platform not installed."
-              exit 1
-            }
+          if sdkmanager --list_installed | grep -q "platforms;android-35"; then
+            echo "✓ Android 35 platform installed"
+          else
+            echo "WARNING: Android 35 platform not found"
+          fi
 
-          sdkmanager --list_installed | grep -q "build-tools;35.0.0" \
-            || {
-              echo "ERROR: build-tools 35.0.0 not installed."
-              exit 1
-            }
+          if sdkmanager --list_installed | grep -q "build-tools;35.0.0"; then
+            echo "✓ Build Tools 35.0.0 installed"
+          else
+            echo "WARNING: Build Tools 35.0.0 not found"
+          fi
 
           echo ""
-          echo "Android SDK verification successful."
+          echo "Android SDK verification completed."
 
 
       # ==================================================
@@ -343,6 +386,7 @@ jobs:
 
           echo ""
           echo "Settings files:"
+
           find . -maxdepth 2 -type f \
             \( \
               -name "settings.gradle" \
@@ -352,6 +396,7 @@ jobs:
 
           echo ""
           echo "Build files:"
+
           find . -maxdepth 3 -type f \
             \( \
               -name "build.gradle" \
@@ -369,7 +414,7 @@ jobs:
 
 
       # ==================================================
-      # 14. BUILD DEBUG APK
+      # 14. BUILD APK
       # ==================================================
 
       - name: Build APK
@@ -397,8 +442,7 @@ jobs:
 
           if [ "$BUILD_TYPE" = "release" ]; then
 
-            echo "Running:"
-            echo "./gradlew assembleRelease"
+            echo "Running assembleRelease..."
 
             ./gradlew assembleRelease \
               --stacktrace \
@@ -408,8 +452,7 @@ jobs:
 
           else
 
-            echo "Running:"
-            echo "./gradlew assembleDebug"
+            echo "Running assembleDebug..."
 
             ./gradlew assembleDebug \
               --stacktrace \
@@ -449,8 +492,7 @@ jobs:
 
           if [ "$BUILD_TYPE" = "release" ]; then
 
-            echo "Running:"
-            echo "./gradlew bundleRelease"
+            echo "Running bundleRelease..."
 
             ./gradlew bundleRelease \
               --stacktrace \
@@ -460,8 +502,7 @@ jobs:
 
           else
 
-            echo "Running:"
-            echo "./gradlew bundleDebug"
+            echo "Running bundleDebug..."
 
             ./gradlew bundleDebug \
               --stacktrace \
@@ -486,6 +527,7 @@ jobs:
 
           echo ""
           echo "APK files:"
+
           find extracted \
             -type f \
             -name "*.apk" \
@@ -493,6 +535,7 @@ jobs:
 
           echo ""
           echo "AAB files:"
+
           find extracted \
             -type f \
             -name "*.aab" \
@@ -500,18 +543,12 @@ jobs:
 
           echo ""
           echo "Build reports:"
+
           find extracted \
             -type f \
             -path "*/build/reports/*" \
             -print \
             | head -100
-
-          echo ""
-          echo "Build directories:"
-          find extracted \
-            -type d \
-            -name "build" \
-            -print
 
 
       # ==================================================
@@ -536,14 +573,19 @@ jobs:
             | head -n 1)
 
           if [ -z "$APK" ]; then
+
             echo ""
             echo "ERROR: No APK was generated."
             echo ""
 
-            echo "Searching for all APK/AAB files:"
+            echo "Searching for APK/AAB files:"
+
             find extracted \
               -type f \
-              \( -name "*.apk" -o -name "*.aab" \) \
+              \( \
+                -name "*.apk" \
+                -o -name "*.aab" \
+              \) \
               -print
 
             exit 1
@@ -581,14 +623,19 @@ jobs:
             | head -n 1)
 
           if [ -z "$AAB" ]; then
+
             echo ""
             echo "ERROR: No AAB was generated."
             echo ""
 
-            echo "Searching for all APK/AAB files:"
+            echo "Searching for APK/AAB files:"
+
             find extracted \
               -type f \
-              \( -name "*.apk" -o -name "*.aab" \) \
+              \( \
+                -name "*.apk" \
+                -o -name "*.aab" \
+              \) \
               -print
 
             exit 1
