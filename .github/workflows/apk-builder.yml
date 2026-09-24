@@ -32,16 +32,8 @@ jobs:
 
     steps:
 
-      # --------------------------------------------------
-      # 1. Checkout repository
-      # --------------------------------------------------
-
       - name: Checkout repository
-        uses: actions/checkout@v5
-
-      # --------------------------------------------------
-      # 2. Show repository
-      # --------------------------------------------------
+        uses: actions/checkout@v4
 
       - name: Show repository
         run: |
@@ -56,10 +48,6 @@ jobs:
           echo ""
 
           find . -maxdepth 3 -type f | sort | head -300
-
-      # --------------------------------------------------
-      # 3. Check LiveTV.zip
-      # --------------------------------------------------
 
       - name: Check LiveTV.zip
         run: |
@@ -79,10 +67,6 @@ jobs:
           echo "LiveTV.zip found:"
           ls -lh LiveTV.zip
 
-      # --------------------------------------------------
-      # 4. Extract project
-      # --------------------------------------------------
-
       - name: Extract LiveTV.zip
         run: |
           echo "========================================"
@@ -99,10 +83,6 @@ jobs:
           echo ""
 
           find extracted -maxdepth 6 -type f | sort | head -500
-
-      # --------------------------------------------------
-      # 5. Find Android project
-      # --------------------------------------------------
 
       - name: Find Android project
         id: project
@@ -128,275 +108,251 @@ jobs:
               -o -name "build.gradle.kts" \) \
               | sort
 
+            echo ""
+            echo "Directories:"
+            find extracted -type d | sort | head -500
+
             exit 1
           fi
 
           PROJECT_DIR=$(dirname "$GRADLEW")
 
           echo ""
-          echo "Gradle wrapper found:"
+          echo "gradlew:"
           echo "$GRADLEW"
-          echo ""
 
-          echo "Android project directory:"
+          echo ""
+          echo "PROJECT_DIR:"
           echo "$PROJECT_DIR"
+
+          if [ ! -f "$PROJECT_DIR/settings.gradle" ] &&
+             [ ! -f "$PROJECT_DIR/settings.gradle.kts" ]; then
+
+            echo ""
+            echo "WARNING: settings.gradle/settings.gradle.kts was not found."
+            echo ""
+            echo "Project files:"
+
+            find "$PROJECT_DIR" -maxdepth 2 -type f | sort
+          fi
+
+          if [ ! -d "$PROJECT_DIR/app/src" ]; then
+            echo ""
+            echo "ERROR: app/src was not found."
+            echo ""
+            echo "Available src directories:"
+
+            find "$PROJECT_DIR" -type d -name "src" | sort
+
+            echo ""
+            echo "Project tree:"
+
+            find "$PROJECT_DIR" -maxdepth 4 -type f \
+              | sort \
+              | head -500
+
+            exit 1
+          fi
+
+          echo ""
+          echo "app/src found:"
+          echo "$PROJECT_DIR/app/src"
+
+          echo ""
+          echo "Android source files:"
+
+          find "$PROJECT_DIR/app/src" -type f \
+            | sort \
+            | head -500
+
+          echo ""
+          echo "Gradle files:"
+
+          find "$PROJECT_DIR" -maxdepth 3 -type f \
+            \( -name "*.gradle" -o -name "*.gradle.kts" \) \
+            | sort
 
           echo "project_dir=$PROJECT_DIR" >> "$GITHUB_OUTPUT"
 
-      # --------------------------------------------------
-      # 6. Set executable permission
-      # --------------------------------------------------
-
-      - name: Make Gradle executable
-        run: |
-          PROJECT_DIR="${{ steps.project.outputs.project_dir }}"
-
-          chmod +x "$PROJECT_DIR/gradlew"
-
-          ls -l "$PROJECT_DIR/gradlew"
-
-      # --------------------------------------------------
-      # 7. Set up JDK 17
-      # --------------------------------------------------
-
       - name: Set up JDK 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
-
-      # --------------------------------------------------
-      # 8. Set up Android SDK
-      # --------------------------------------------------
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@v3
 
-      # --------------------------------------------------
-      # 9. Accept Android SDK licenses
-      # --------------------------------------------------
-
-      - name: Accept Android SDK licenses
-        shell: bash
+      - name: Accept Android licenses
         run: |
-          echo "========================================"
-          echo "ACCEPTING ANDROID SDK LICENSES"
-          echo "========================================"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
 
-          yes | sdkmanager --licenses > /dev/null || true
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-          echo ""
-          echo "SDK licenses processed."
-
-      # --------------------------------------------------
-      # 10. Install required Android SDK packages
-      # --------------------------------------------------
-
-      - name: Install Android SDK packages
-        shell: bash
+      - name: Make Gradle executable
+        working-directory: ${{ steps.project.outputs.project_dir }}
         run: |
-          echo "========================================"
-          echo "INSTALLING ANDROID SDK PACKAGES"
-          echo "========================================"
+          chmod +x gradlew
+          ls -lh gradlew
 
-          yes | sdkmanager \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-          echo ""
-          echo "Android SDK packages installed."
-
-      # --------------------------------------------------
-      # 11. Accept licenses again after installation
-      # --------------------------------------------------
-
-      - name: Verify SDK licenses
-        shell: bash
+      - name: Show Java version
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-
+          java -version
           echo ""
-          echo "Installed SDK packages:"
-          sdkmanager --list_installed | head -100
+          echo "JAVA_HOME=$JAVA_HOME"
 
-      # --------------------------------------------------
-      # 12. Show Gradle project
-      # --------------------------------------------------
-
-      - name: Show Gradle project
+      - name: Show Gradle version
+        working-directory: ${{ steps.project.outputs.project_dir }}
         run: |
-          PROJECT_DIR="${{ steps.project.outputs.project_dir }}"
-
-          echo "========================================"
-          echo "ANDROID PROJECT"
-          echo "========================================"
-
-          cd "$PROJECT_DIR"
-
-          echo "Current directory:"
-          pwd
-
-          echo ""
-          echo "Project files:"
-          find . -maxdepth 3 -type f | sort | head -300
-
-          echo ""
-          echo "Gradle version:"
           ./gradlew --version
 
-      # --------------------------------------------------
-      # 13. Build APK
-      # --------------------------------------------------
+      - name: Check Gradle project
+        working-directory: ${{ steps.project.outputs.project_dir }}
+        run: |
+          echo "========================================"
+          echo "GRADLE PROJECT CHECK"
+          echo "========================================"
+
+          ./gradlew tasks \
+            --no-daemon \
+            --stacktrace \
+            --info
 
       - name: Build APK
-        if: inputs.output == 'apk'
-        shell: bash
+        if: ${{ inputs.output == 'apk' }}
+        working-directory: ${{ steps.project.outputs.project_dir }}
         run: |
-          PROJECT_DIR="${{ steps.project.outputs.project_dir }}"
-          BUILD_TYPE="${{ inputs.build_type }}"
-
-          cd "$PROJECT_DIR"
-
           echo "========================================"
           echo "BUILDING APK"
           echo "========================================"
 
-          echo "Build type: $BUILD_TYPE"
-          echo ""
+          if [ "${{ inputs.build_type }}" = "debug" ]; then
 
-          if [ "$BUILD_TYPE" = "release" ]; then
-            ./gradlew assembleRelease \
-              --stacktrace \
-              --no-daemon
-          else
             ./gradlew assembleDebug \
+              --no-daemon \
               --stacktrace \
-              --no-daemon
+              --info
+
+          else
+
+            ./gradlew assembleRelease \
+              --no-daemon \
+              --stacktrace \
+              --info
+
           fi
 
-      # --------------------------------------------------
-      # 14. Build AAB
-      # --------------------------------------------------
-
       - name: Build AAB
-        if: inputs.output == 'aab'
-        shell: bash
+        if: ${{ inputs.output == 'aab' }}
+        working-directory: ${{ steps.project.outputs.project_dir }}
         run: |
-          PROJECT_DIR="${{ steps.project.outputs.project_dir }}"
-          BUILD_TYPE="${{ inputs.build_type }}"
-
-          cd "$PROJECT_DIR"
-
           echo "========================================"
           echo "BUILDING AAB"
           echo "========================================"
 
-          echo "Build type: $BUILD_TYPE"
-          echo ""
+          if [ "${{ inputs.build_type }}" = "debug" ]; then
 
-          if [ "$BUILD_TYPE" = "release" ]; then
-            ./gradlew bundleRelease \
-              --stacktrace \
-              --no-daemon
-          else
             ./gradlew bundleDebug \
+              --no-daemon \
               --stacktrace \
-              --no-daemon
+              --info
+
+          else
+
+            ./gradlew bundleRelease \
+              --no-daemon \
+              --stacktrace \
+              --info
+
           fi
 
-      # --------------------------------------------------
-      # 15. Find generated files
-      # --------------------------------------------------
-
-      - name: Find build outputs
-        if: success()
-        shell: bash
+      - name: Show build outputs
+        if: always()
+        working-directory: ${{ steps.project.outputs.project_dir }}
         run: |
           echo "========================================"
           echo "BUILD OUTPUTS"
           echo "========================================"
 
           echo ""
-          echo "APK files:"
-          find extracted -type f -name "*.apk" -print
+          echo "APK/AAB files:"
+
+          find . -type f \
+            \( -name "*.apk" -o -name "*.aab" \) \
+            | sort
 
           echo ""
-          echo "AAB files:"
-          find extracted -type f -name "*.aab" -print
+          echo "Build output directories:"
 
-          echo ""
-          echo "Build reports:"
-          find extracted -type f -path "*/build/reports/*" -print | head -100
+          find . -type d \
+            -path "*/build/outputs/*" \
+            | sort
 
-      # --------------------------------------------------
-      # 16. Prepare APK artifact
-      # --------------------------------------------------
-
-      - name: Prepare APK artifact
-        if: success() && inputs.output == 'apk'
+      - name: Find generated output
+        id: output
         shell: bash
         run: |
-          rm -rf output
-          mkdir -p output
+          echo "========================================"
+          echo "SEARCHING FOR GENERATED OUTPUT"
+          echo "========================================"
 
-          APK=$(find extracted -type f -name "*.apk" | head -n 1)
+          OUTPUT_FILE=$(find \
+            "${{ steps.project.outputs.project_dir }}" \
+            -type f \
+            \( -name "*.apk" -o -name "*.aab" \) \
+            -path "*/build/outputs/*" \
+            | head -n 1)
 
-          if [ -z "$APK" ]; then
-            echo "ERROR: No APK was generated."
+          if [ -z "$OUTPUT_FILE" ]; then
+
             echo ""
-            find extracted -type f | grep -E '\.(apk|aab)$' || true
+            echo "ERROR: No APK or AAB was generated."
+
+            echo ""
+            echo "Build output directories:"
+
+            find \
+              "${{ steps.project.outputs.project_dir }}" \
+              -type d \
+              -path "*/build/outputs/*" \
+              | sort
+
+            echo ""
+            echo "Gradle reports:"
+
+            find \
+              "${{ steps.project.outputs.project_dir }}" \
+              -type f \
+              -path "*/build/reports/*" \
+              | sort \
+              | head -200
+
             exit 1
           fi
 
-          echo "Found APK:"
-          echo "$APK"
-
-          cp "$APK" output/app-${{ inputs.build_type }}.apk
+          echo ""
+          echo "OUTPUT FOUND:"
+          echo "$OUTPUT_FILE"
 
           echo ""
-          echo "Prepared artifact:"
-          ls -lh output/
+          ls -lh "$OUTPUT_FILE"
 
-      # --------------------------------------------------
-      # 17. Prepare AAB artifact
-      # --------------------------------------------------
-
-      - name: Prepare AAB artifact
-        if: success() && inputs.output == 'aab'
-        shell: bash
-        run: |
-          rm -rf output
-          mkdir -p output
-
-          AAB=$(find extracted -type f -name "*.aab" | head -n 1)
-
-          if [ -z "$AAB" ]; then
-            echo "ERROR: No AAB was generated."
-            echo ""
-            find extracted -type f | grep -E '\.(apk|aab)$' || true
-            exit 1
-          fi
-
-          echo "Found AAB:"
-          echo "$AAB"
-
-          cp "$AAB" output/app-${{ inputs.build_type }}.aab
-
-          echo ""
-          echo "Prepared artifact:"
-          ls -lh output/
-
-      # --------------------------------------------------
-      # 18. Upload APK/AAB
-      # --------------------------------------------------
+          echo "output_file=$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifact
-        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: LiveTV-${{ inputs.output }}-${{ inputs.build_type }}
-          path: output/
+          name: apk-builder-output
+          path: ${{ steps.output.outputs.output_file }}
           if-no-files-found: error
-          retention-days: 7
+
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-debug-reports
+          path: |
+            ${{ steps.project.outputs.project_dir }}/**/build/reports/**
+            ${{ steps.project.outputs.project_dir }}/**/build/outputs/logs/**
+          if-no-files-found: warn
