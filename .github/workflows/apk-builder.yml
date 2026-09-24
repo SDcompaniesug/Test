@@ -183,9 +183,40 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Accept Android licenses
+      - name: Accept Android SDK licenses
+        shell: bash
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          echo "========================================"
+          echo "ACCEPTING ANDROID SDK LICENSES"
+          echo "========================================"
+
+          set +e
+
+          yes | sdkmanager --licenses
+
+          LICENSE_EXIT=$?
+
+          echo ""
+          echo "sdkmanager license process exited with: $LICENSE_EXIT"
+
+          # Do not stop the workflow here.
+          exit 0
+
+      - name: Show Android SDK information
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "ANDROID SDK INFORMATION"
+          echo "========================================"
+
+          echo ""
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+
+          echo ""
+          echo "Installed SDK packages:"
+
+          sdkmanager --list_installed || true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -291,6 +322,7 @@ jobs:
 
       - name: Find generated output
         id: output
+        if: success()
         shell: bash
         run: |
           echo "========================================"
@@ -341,6 +373,7 @@ jobs:
           echo "output_file=$OUTPUT_FILE" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: apk-builder-output
@@ -356,3 +389,20 @@ jobs:
             ${{ steps.project.outputs.project_dir }}/**/build/reports/**
             ${{ steps.project.outputs.project_dir }}/**/build/outputs/logs/**
           if-no-files-found: warn
+
+Then do this
+
+1. Open ".github/workflows/apk-builder.yml".
+2. Delete the old contents.
+3. Paste the complete workflow above.
+4. Commit changes.
+5. Go back to Actions → APK Builder.
+6. Tap Run workflow.
+7. Select:
+   - output: "apk"
+   - build_type: "debug"
+8. Run it.
+
+The important change is that the workflow now explicitly processes the SDK licenses and prints the installed SDK information before Gradle starts.
+
+If the new run fails after "GRADLE PROJECT CHECK", send me the new red error section. That will be the actual project/Gradle error rather than the SDK license problem.
