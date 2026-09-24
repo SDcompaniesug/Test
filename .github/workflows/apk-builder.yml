@@ -1,0 +1,57 @@
+name: APK Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      output:
+        description: "Build output"
+        required: true
+        type: choice
+        options: [apk, aab]
+        default: apk
+      build_type:
+        description: "Build type"
+        required: true
+        type: choice
+        options: [debug, release]
+        default: debug
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+      - uses: android-actions/setup-android@v3
+      - name: Accept licenses
+        run: yes | sdkmanager --licenses > /dev/null || true
+      - name: Make Gradle executable
+        run: chmod +x gradlew || true
+      - name: Build debug APK
+        if: inputs.output == 'apk' && inputs.build_type == 'debug'
+        run: ./gradlew assembleDebug
+      - name: Build release APK
+        if: inputs.output == 'apk' && inputs.build_type == 'release'
+        run: ./gradlew assembleRelease
+      - name: Build debug AAB
+        if: inputs.output == 'aab' && inputs.build_type == 'debug'
+        run: ./gradlew bundleDebug
+      - name: Build release AAB
+        if: inputs.output == 'aab' && inputs.build_type == 'release'
+        run: ./gradlew bundleRelease
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-builder-output
+          path: |
+            **/build/outputs/apk/**/*.apk
+            **/build/outputs/bundle/**/*.aab
+          if-no-files-found: error
